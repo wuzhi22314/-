@@ -55,6 +55,152 @@
         -webkit-font-smoothing: antialiased;
       }
 
+
+      /* Unit Phrase section */
+      .unit-phrase-section {
+        margin-top: 16px;
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .unit-phrase-section-header {
+        padding: 12px 16px;
+        background: var(--success-light);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--success);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .unit-phrase-list {
+        padding: 8px 0;
+      }
+
+      .unit-phrase-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .phrase-item:last-child {
+        border-bottom: none;
+      }
+
+      .unit-phrase-text {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--text);
+        min-width: 140px;
+      }
+
+      .unit-phrase-meaning {
+        font-size: 14px;
+        color: var(--text-secondary);
+        flex: 1;
+      }
+
+      .unit-phrase-speak-btn {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: var(--success-light);
+        color: var(--success);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .unit-phrase-speak-btn:hover {
+        background: var(--success);
+        color: white;
+      }
+
+      .unit-phrase-speak-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* Unit Sentence section */
+      .unit-sentence-section {
+        margin-top: 16px;
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .unit-sentence-section-header {
+        padding: 12px 16px;
+        background: var(--warning-light);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--warning);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .unit-sentence-list {
+        padding: 8px 0;
+      }
+
+      .unit-sentence-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px 16px;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .sentence-item:last-child {
+        border-bottom: none;
+      }
+
+      .unit-sentence-cn {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+
+      .unit-sentence-en {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text);
+        flex: 1;
+      }
+
+      .unit-sentence-speak-btn {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: var(--warning-light);
+        color: var(--warning);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        margin-top: 4px;
+      }
+
+      .unit-sentence-speak-btn:hover {
+        background: var(--warning);
+        color: white;
+      }
+
+      .unit-sentence-speak-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
       /* Header */
       .header {
         position: sticky;
@@ -2206,6 +2352,46 @@
             section.appendChild(createWordCard(item));
           });
 
+          // Add phrase section
+          const unitPhrases = PHRASES.filter(p => p.unit === unit);
+          if (unitPhrases.length > 0) {
+            const phraseSection = document.createElement("div");
+            phraseSection.className = "unit-phrase-section";
+            let phraseHtml = '<div class="unit-phrase-section-header"><span>📝 词组 (' + unitPhrases.length + ')</span></div>';
+            phraseHtml += '<div class="unit-phrase-list">';
+            unitPhrases.forEach(p => {
+              phraseHtml += '<div class="unit-phrase-item">';
+              phraseHtml += '<div class="unit-phrase-text">' + p.phrase + '</div>';
+              phraseHtml += '<div class="unit-phrase-meaning">' + p.meaning + '</div>';
+              phraseHtml += '<button class="unit-phrase-speak-btn" onclick="speak(this.dataset.phrase)" data-phrase="' + p.phrase.replace(/"/g, '&quot;') + '" title="朗读">';
+              phraseHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>';
+              phraseHtml += '</button></div>';
+            });
+            phraseHtml += '</div>';
+            phraseSection.innerHTML = phraseHtml;
+            section.appendChild(phraseSection);
+          }
+
+          // Add sentence section
+          const unitSentences = SENTENCES.filter(s => s.unit === unit);
+          if (unitSentences.length > 0) {
+            const sentenceSection = document.createElement("div");
+            sentenceSection.className = "unit-sentence-section";
+            let sentenceHtml = '<div class="unit-sentence-section-header"><span>📖 句子 (' + unitSentences.length + ')</span></div>';
+            sentenceHtml += '<div class="unit-sentence-list">';
+            unitSentences.forEach(s => {
+              sentenceHtml += '<div class="unit-sentence-item">';
+              sentenceHtml += '<div class="unit-sentence-cn">' + s.cn + '</div>';
+              sentenceHtml += '<div class="unit-sentence-en">' + s.en + '</div>';
+              sentenceHtml += '<button class="unit-sentence-speak-btn" onclick="speak(this.dataset.sentence)" data-sentence="' + s.en.replace(/"/g, '&quot;') + '" title="朗读">';
+              sentenceHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>';
+              sentenceHtml += '</button></div>';
+            });
+            sentenceHtml += '</div>';
+            sentenceSection.innerHTML = sentenceHtml;
+            section.appendChild(sentenceSection);
+          }
+
           content.appendChild(section);
         });
 
@@ -3843,7 +4029,7 @@
         const phrasesHtml = item.phrases && item.phrases.length > 0
           ? `<div class="phrase-section">
               <div class="detail-label">常用短语</div>
-              <div class="phrase-list">
+              <div class="unit-phrase-list">
                 ${item.phrases.map(p => `<span class="phrase-item">${p}</span>`).join('')}
               </div>
             </div>`
@@ -3852,11 +4038,11 @@
         const sentencesHtml = item.sentences && item.sentences.length > 0
           ? `<div class="sentence-section">
               <div class="detail-label">例句</div>
-              <div class="sentence-list">
+              <div class="unit-sentence-list">
                 ${item.sentences.map(s => `
-                  <div class="sentence-item">
-                    <div class="sentence-en">${s.en || ''}</div>
-                    <div class="sentence-cn">${s.cn || ''}</div>
+                  <div class="unit-sentence-item">
+                    <div class="unit-sentence-en">${s.en || ''}</div>
+                    <div class="unit-sentence-cn">${s.cn || ''}</div>
                   </div>
                 `).join('')}
               </div>
