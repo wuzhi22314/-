@@ -2157,74 +2157,16 @@
         answered: false,
       };
 
-      let voicesLoaded = false;
-      let selectedVoice = null;
-      let audioUnlocked = false;
       let ttsAudio = null;
 
-      function loadVoices() {
-        const voices = speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          voicesLoaded = true;
-          selectedVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
-            || voices.find(v => v.lang === 'en-US')
-            || voices.find(v => v.lang.startsWith('en'))
-            || voices[0];
-        }
-      }
-
-      if ('speechSynthesis' in window) {
-        loadVoices();
-        speechSynthesis.onvoiceschanged = loadVoices;
-
-        function unlockAudio() {
-          if (audioUnlocked) return;
-          audioUnlocked = true;
-          const u = new SpeechSynthesisUtterance('');
-          u.volume = 0;
-          speechSynthesis.speak(u);
-        }
-        document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
-        document.addEventListener('click', unlockAudio, { once: true });
-
-        setInterval(() => {
-          if (speechSynthesis.speaking && !speechSynthesis.paused) {
-            speechSynthesis.pause();
-            speechSynthesis.resume();
-          }
-        }, 10000);
-      }
-
       function speak(word) {
-        if ('speechSynthesis' in window) {
-          const synth = window.speechSynthesis;
-          synth.cancel();
-          const utterance = new SpeechSynthesisUtterance(word);
-          utterance.lang = "en-US";
-          utterance.rate = 0.75;
-          utterance.pitch = 1;
-          utterance.volume = 1;
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-          }
-          utterance.onend = () => {};
-          utterance.onerror = () => {};
-          synth.speak(utterance);
-          setTimeout(() => {
-            if (!synth.speaking) {
-              synth.speak(utterance);
-            }
-          }, 100);
-        } else {
-          // Fallback: Youdao TTS for browsers without speechSynthesis
-          if (ttsAudio) {
-            ttsAudio.pause();
-            ttsAudio = null;
-          }
-          ttsAudio = new Audio('https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=1');
-          ttsAudio.volume = 1;
-          ttsAudio.play().catch(() => {});
+        if (ttsAudio) {
+          ttsAudio.pause();
+          ttsAudio = null;
         }
+        ttsAudio = new Audio('https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=1');
+        ttsAudio.volume = 1;
+        ttsAudio.play().catch(() => {});
       }
 
       function shuffleArray(arr) {
