@@ -2310,7 +2310,7 @@
               phraseHtml += '<div class="unit-phrase-item">';
               phraseHtml += '<div class="unit-phrase-text">' + p.phrase + '</div>';
               phraseHtml += '<div class="unit-phrase-meaning">' + p.meaning + '</div>';
-              phraseHtml += '<button class="unit-phrase-speak-btn" onclick="speak(__allPhrases[' + unitPhrases.indexOf(p) + '].phrase)" title="朗读">';
+              phraseHtml += '<button class="unit-phrase-speak-btn" onclick="speak(__allPhrases[' + PHRASES.indexOf(p) + '].phrase)" title="朗读">';
               phraseHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>';
               phraseHtml += '</button></div>';
             });
@@ -2330,7 +2330,7 @@
               sentenceHtml += '<div class="unit-sentence-item">';
               sentenceHtml += '<div class="unit-sentence-cn">' + s.cn + '</div>';
               sentenceHtml += '<div class="unit-sentence-en">' + s.en + '</div>';
-              sentenceHtml += '<button class="unit-sentence-speak-btn" onclick="speak(__allSentences[' + unitSentences.indexOf(s) + '].en)" title="朗读">';
+              sentenceHtml += '<button class="unit-sentence-speak-btn" onclick="speak(__allSentences[' + SENTENCES.indexOf(s) + '].en)" title="朗读">';
               sentenceHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>';
               sentenceHtml += '</button></div>';
             });
