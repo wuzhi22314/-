@@ -2159,14 +2159,39 @@
 
       let ttsAudio = null;
 
-      function speak(word) {
+      function speak(text) {
         if (ttsAudio) {
           ttsAudio.pause();
           ttsAudio = null;
         }
-        ttsAudio = new Audio('https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=1');
+        var url = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=1';
+        ttsAudio = new Audio(url);
         ttsAudio.volume = 1;
-        ttsAudio.play().catch(() => {});
+        var fallbackTimer = setTimeout(function() {
+          if (ttsAudio && ttsAudio.paused && ttsAudio.readyState < 3) {
+            ttsAudio = null;
+            speakFallback(text);
+          }
+        }, 2000);
+        ttsAudio.addEventListener('canplay', function() { clearTimeout(fallbackTimer); });
+        ttsAudio.play().catch(function() {
+          clearTimeout(fallbackTimer);
+          speakFallback(text);
+        });
+        ttsAudio.addEventListener('error', function() {
+          clearTimeout(fallbackTimer);
+          speakFallback(text);
+        });
+      }
+
+      function speakFallback(text) {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          var u = new SpeechSynthesisUtterance(text);
+          u.lang = 'en-US';
+          u.rate = 0.8;
+          window.speechSynthesis.speak(u);
+        }
       }
 
       function shuffleArray(arr) {
