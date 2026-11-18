@@ -2582,11 +2582,7 @@
         }
 
         const units = groupByUnit(filtered);
-        const sortedUnits = Object.keys(units).sort((a, b) => {
-          const numA = parseInt(a.replace(/\D/g, '')) || 0;
-          const numB = parseInt(b.replace(/\D/g, '')) || 0;
-          return numA - numB;
-        });
+        const sortedUnits = Object.keys(units).sort(unitOrder);
 
         sortedUnits.forEach((unit) => {
           const section = document.createElement("div");
@@ -2649,6 +2645,15 @@
         });
 
         document.getElementById("wordCount").textContent = `共 ${filtered.length} 个单词`;
+      }
+
+      // 名字里没编号的单元排在所有 List 之后，不会再抢在 List 1 前面
+      function unitOrder(a, b) {
+        const numA = parseInt(String(a).replace(/\D/g, ''), 10);
+        const numB = parseInt(String(b).replace(/\D/g, ''), 10);
+        const ka = isNaN(numA) ? Number.MAX_SAFE_INTEGER : numA;
+        const kb = isNaN(numB) ? Number.MAX_SAFE_INTEGER : numB;
+        return ka - kb || String(a).localeCompare(String(b));
       }
 
       function groupByUnit(words) {
@@ -2723,11 +2728,7 @@
         }
 
         const units = [...new Set(dataSource.map(w => w.unit || '默认单元'))];
-        units.sort((a, b) => {
-          const numA = parseInt(a.replace(/\D/g, '')) || 0;
-          const numB = parseInt(b.replace(/\D/g, '')) || 0;
-          return numA - numB;
-        });
+        units.sort(unitOrder);
 
         const unitCounts = {};
         dataSource.forEach(w => {
