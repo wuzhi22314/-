@@ -201,6 +201,86 @@
         height: 16px;
       }
 
+      /* 朗读反馈：整行可点，播放中高亮 + 光圈 */
+      .unit-phrase-item,
+      .unit-sentence-item {
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(79, 110, 247, 0.12);
+        transition: background 0.15s;
+      }
+
+      .unit-phrase-item.speaking,
+      .unit-sentence-item.speaking {
+        background: var(--primary-light);
+      }
+
+      .unit-phrase-item.speaking .unit-phrase-speak-btn,
+      .unit-sentence-item.speaking .unit-sentence-speak-btn,
+      .speak-btn.speaking,
+      .quiz-speak-btn.speaking {
+        animation: ttsPulse 0.9s ease-in-out infinite;
+      }
+
+      .example-sentence,
+      .phrase-item,
+      .extend-words .phrase-tag {
+        cursor: pointer;
+        -webkit-tap-highlight-color: rgba(79, 110, 247, 0.12);
+        border-radius: 6px;
+      }
+
+      .example-sentence.speaking,
+      .phrase-item.speaking,
+      .phrase-tag.speaking {
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+
+      .tts-empty {
+        animation: ttsNope 0.4s ease-in-out;
+      }
+
+      @keyframes ttsNope {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+
+      .tts-hint {
+        position: fixed;
+        left: 50%;
+        bottom: 30px;
+        transform: translate(-50%, 14px);
+        max-width: 82vw;
+        padding: 10px 16px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.84);
+        color: #fff;
+        font-size: 13px;
+        line-height: 1.5;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s, transform 0.25s;
+        z-index: 999;
+      }
+
+      .tts-hint.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      @keyframes ttsPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(79, 110, 247, 0.5); }
+        50% { box-shadow: 0 0 0 8px rgba(79, 110, 247, 0); }
+      }
+
+      .speak-btn, .quiz-speak-btn,
+      .unit-phrase-speak-btn, .unit-sentence-speak-btn {
+        touch-action: manipulation;
+      }
+
       /* Header */
       .header {
         position: sticky;
@@ -2045,8 +2125,18 @@
         }
 
         .speak-btn {
-          width: 28px;
-          height: 28px;
+          width: 32px;
+          height: 32px;
+        }
+
+        .unit-phrase-speak-btn,
+        .unit-sentence-speak-btn {
+          width: 36px;
+          height: 36px;
+        }
+
+        .unit-phrase-text {
+          min-width: 110px;
         }
 
         .quiz-speak-btn {
@@ -2144,8 +2234,6 @@
       const SENTENCES = [{"cn": "她坐在那里，读着一本小说", "en": "She sat there, reading a novel.", "unit": "List 1"}, {"cn": "在过去的十年里，我的家乡已经发生了巨大变化", "en": "Great changes have taken place in my home town in the past ten years.", "unit": "List 1"}, {"cn": "他们花了十年时间建造大坝", "en": "It took them ten years to build the dam.", "unit": "List 1"}, {"cn": "他正在读一篇关于如何学习英语的文章", "en": "He is reading an article about how to learn English.", "unit": "List 1"}, {"cn": "为了赶上其他的人，我必须更加努力地工作", "en": "In order to catch up with the others, I must work harder.", "unit": "List 1"}, {"cn": "多么漂亮的中国画啊", "en": "What a beautiful Chinese painting!", "unit": "List 2"}, {"cn": "这是我的书。这本书是我的", "en": "This is my book. / This book is mine.", "unit": "List 2"}, {"cn": "我想要的是这个。/ 我想要这个", "en": "What I want is this. / I want this.", "unit": "List 2"}, {"cn": "除了足球，他还对网球感兴趣", "en": "He is interested in tennis besides football.", "unit": "List 2"}, {"cn": "除了几处拼写错误以外，你的作文写得很好", "en": "Your composition is good except for a few spelling mistakes.", "unit": "List 2"}, {"cn": "除了等待，她别无选择", "en": "She had no choice but to wait.", "unit": "List 3"}, {"cn": "除了看小说，他昨天什么也没干", "en": "He did nothing but read a novel yesterday.", "unit": "List 3"}, {"cn": "\"既然每个人都在这里，\"她说，\"让我们开始讨论我们发现的问题的解决方案。\" \"Now that everyone's here,\" she said, \"let's begin to discuss the solution to the problems we have found.\"", "en": "", "unit": "List 3"}, {"cn": "有些公司可能不让你租一辆车除非你有信用卡", "en": "Some companies might not let you rent a car unless you have a credit card.", "unit": "List 3"}, {"cn": "无论你决定做什么，你都应该试着让它成功", "en": "Whatever you decide to do, you should try to make it a success.", "unit": "List 3"}, {"cn": "格拉斯哥的生活成本是英国最低的，然而生活质量可能是英国最高的", "en": "The cost of living in Glasgow is among the lowest in Britain, while the quality of life is probably one of the highest.", "unit": "List 4"}, {"cn": "他刚一走进教室，门铃就响了", "en": "Hardly had he entered the classroom when the bell rang.", "unit": "List 4"}, {"cn": "虽然他很聪明，但他找不到这个问题的答案", "en": "Smart as he is, he can't find the answer to this question.", "unit": "List 4"}, {"cn": "在国外学习期间，他在经济上依赖于他的妻子", "en": "While studying abroad, he financially depended on his wife.", "unit": "List 4"}, {"cn": "我只在工作日工作，而不是在周末", "en": "I only work on weekdays, not at weekends.", "unit": "List 4"}, {"cn": "当我看到他脸上的表情时，我意识到他和我是一致的", "en": "When I saw the expression on his face, I realized he was in agreement with me.", "unit": "List 5"}, {"cn": "因为他们在约会，我们很多人都相信他们恋爱了", "en": "Because they are on a date, many of us believe that they are in love.", "unit": "List 5"}, {"cn": "最后，他有时间看一看这份报告", "en": "Finally he got time for a glance at this report.", "unit": "List 5"}, {"cn": "能够预测价格变化对供求的影响程度是很有用的", "en": "It is useful to be able to predict the extent to which a price change will influence supply and demand.", "unit": "List 5"}, {"cn": "世界人口正以危险的速度增长", "en": "The population of the world is growing at a dangerous rate.", "unit": "List 5"}, {"cn": "你所说的与正在讨论的问题没有任何关系", "en": "What you are saying has nothing to do with the question under discussion.", "unit": "List 6"}, {"cn": "他说的话值得注意", "en": "What he said is worthy of note.", "unit": "List 6"}, {"cn": "不仅老师而且学生也希望放假", "en": "Not only the teacher but also the students wish for a holiday. = The students as well as the teacher wish for a holiday.", "unit": "List 6"}, {"cn": "一些人糟踏食物而另一些人却食不果腹", "en": "Some people waste food while others haven't enough.", "unit": "List 6"}, {"cn": "他把那个名字记下来以防忘了", "en": "He took the name down for fear that he should forget it.", "unit": "List 6"}, {"cn": "他似乎对那个城市很熟悉，他以前可能去过那儿", "en": "He seems to know the city quite well. He may have been there before.", "unit": "List 7"}, {"cn": "你应该去复习你的课。（事实上你没有复习功课。）You should have gone over your lessons. (In fact you didn't go over your lessons.)", "en": "", "unit": "List 7"}, {"cn": "依靠微薄的收入是很难养家的", "en": "It's difficult to raise a family on a small income.", "unit": "List 7"}, {"cn": "你的头发需要剪掉（需要剪掉）", "en": "Your hair wants/needs cutting (needs to be cut).", "unit": "List 7"}, {"cn": "我从未听说过这样的事情", "en": "Never did I hear of such a thing.", "unit": "List 7"}, {"cn": "这位足球运动员希望尽快转会到另一支球队", "en": "The football player is hoping to transfer to another team soon.", "unit": "List 8"}, {"cn": "跟上潮流是非常昂贵的", "en": "It is very expensive to keep up with the fashion.", "unit": "List 8"}, {"cn": "如果你遇到困难，不要犹豫寻求帮助", "en": "If you get into difficulties, don't hesitate to ask for help.", "unit": "List 8"}, {"cn": "国防计算机计算出摧毁敌方导弹的方法", "en": "The defense computers calculate way to destroy the enemy missiles.", "unit": "List 8"}, {"cn": "学院正计划提供更多的英语课程，以满足英语初学者的需要", "en": "The college is planning to offer more English courses to meet the needs of beginners of English.", "unit": "List 8"}, {"cn": "由于被指控欺骗顾客，店员被解雇了", "en": "The shop assistant was dismissed as she was accused of cheating customers.", "unit": "List 9"}, {"cn": "我们的希望在医生的第一眼出现了", "en": "Our hopes arose at the first sight of the doctor.", "unit": "List 9"}, {"cn": "爱丽丝信任你；只有你能说服她放弃这个愚蠢的想法", "en": "Alice trusts you; only you can persuade her to give up the foolish idea.", "unit": "List 9"}, {"cn": "这门课的学生年龄从 18 岁到 20 岁不等", "en": "The age of the students in this class ranges from eighteen to twenty.", "unit": "List 9"}, {"cn": "让孩子自己去上学是有风险的", "en": "It would be running a risk to let the child go to school by himself.", "unit": "List 9"}, {"cn": "随着工业的发展，这个地区肯定会蓬勃发展", "en": "With the development of industry, this region will surely thrive.", "unit": "List 10"}, {"cn": "委员会经过几天的讨论才得出结论", "en": "The committee reached a conclusion only after days of discussion.", "unit": "List 10"}, {"cn": "他发现很难适应这个城市的气候，于是他决定搬到北方", "en": "Finding it difficult to adapt to the climate in the city, he decided to move to the north.", "unit": "List 10"}, {"cn": "仅仅因为他失败过一次，那不意味着他每次都会失败", "en": "Just because he failed once, it does not follow that he will fail every time.", "unit": "List 10"}, {"cn": "被高度赞扬的小提琴家最终被证明是非常失望的", "en": "The violinist who had been praised very highly turned out to be a great disappointment.", "unit": "List 10"}, {"cn": "我们应该重视老一辈人给我们留下的丰富的文学遗产", "en": "We should value the rich legacy of literature which the old generation has handed down to us.", "unit": "List 11"}, {"cn": "这消息是一个令人震惊的消息，那个年轻人自杀了", "en": "The news came as a shocking blow that the young man had committed suicide.", "unit": "List 11"}, {"cn": "她太投入电脑游戏了，以至于忘了上课", "en": "She was so involved in the computer games that she forgot to have class.", "unit": "List 11"}, {"cn": "他们喜欢这个地区，但他们无法忍受交通噪音", "en": "They liked the area, but they could not put up with the traffic noise.", "unit": "List 11"}, {"cn": "在炎热的天气里，肉很容易变质", "en": "Meat easily goes bad in hot weather.", "unit": "List 11"}, {"cn": "我不知道该怎么做，但突然想到了一个主意", "en": "I didn't know what to do but then an idea suddenly occurred to me.", "unit": "List 12"}, {"cn": "我们公司的经理问我是否有可能在一周内制定出营销计划", "en": "The manager of our company asked me if it was possible for me to work out the marketing plan within a week.", "unit": "List 12"}, {"cn": "再给我一个小时，我就能完成这项工作（\"祈使句 +and/ or+ 句子\"）", "en": "Give me one more hour, and I'll get the work finished.", "unit": "List 12"}, {"cn": "假如多给一些时间，他会干得更出色", "en": "Given more time, he would be able to do better.", "unit": "List 12"}, {"cn": "这是我第一次访问中国", "en": "This is the first time that I have visited China.", "unit": "List 12"}, {"cn": "这是他第三次犯同样的错误了", "en": "It was the third time (that) he had made the same mistake.", "unit": "List 13"}, {"cn": "我们刚到家大雨就倾盆而下", "en": "Hardly (No sooner) had I got home when (than) the rain poured down.", "unit": "List 13"}, {"cn": "你到达纽约的时候，你已经离开两个星期", "en": "By the time you arrive in New York, you will have been away for two weeks.", "unit": "List 13"}, {"cn": "这种材料摸起来很柔软", "en": "The material feels very soft.", "unit": "List 13"}, {"cn": "在那之前，他的家人已经六个月没有收到他的信了", "en": "Until then, his family hadn't heard from him for six months.", "unit": "List 13"}, {"cn": "奥兰多，佛罗里达的一个城市，以其主要的吸引力——魔法王国而闻名", "en": "Orlando, a city in Florida, is well known for its main attraction, Magic Kingdom.", "unit": "List 14"}, {"cn": "她在 1980 年结婚", "en": "She got married in 1980.", "unit": "List 14"}, {"cn": "想不下苦功就能学会外语是不可能的", "en": "It is impossible to learn a foreign language without making painstaking effort.", "unit": "List 14"}, {"cn": "我本来打算拜访你的，但却被阻止了", "en": "I intended to have called on you, but was prevented from doing so.", "unit": "List 14"}, {"cn": "他搬起石头砸自己的脚。only to do（结果却…）表示一种意想不到的结果", "en": "He lifted a rock only to drop it on his own feet.", "unit": "List 14"}, {"cn": "他的视力太差了，不能看这么小的字", "en": "His eyesight is too poor to read such small letter.", "unit": "List 15"}, {"cn": "这小姑娘不知道是哭好还是笑好", "en": "The little girl hardly knew whether to laugh or cry.（两个并列的不定式由 and 或 or 连接时，省略后面的不定式中的 to。）.", "unit": "List 15"}, {"cn": "下午我有很多事情要做", "en": "I have a lot of things to do this afternoon.（to do 与 things 是动宾关系，与 I 是主谓关系。否则，在表示被动意义时，仍需要被动式。）.", "unit": "List 15"}, {"cn": "这盒子轻得可带走", "en": "The box is light enough to carry.", "unit": "List 15"}, {"cn": "等他是没有用的", "en": "It is no use waiting for him any longer.", "unit": "List 15"}, {"cn": "我在和外国人交谈方面没有什么困难", "en": "I have no difficulty (in) communicating with foreigners.", "unit": "List 16"}, {"cn": "这些树需要浇水了", "en": "The trees want watering/ to be watered.", "unit": "List 16"}, {"cn": "面试后，她得到了那份工作", "en": "After having been interviewed, she was offered the job.", "unit": "List 16"}, {"cn": "泰德告诉我，他总是能逃脱罚款，因为他买了一辆非常快的跑车", "en": "Ted has told me that he always escapes being fined as he got a very fast sports car.", "unit": "List 16"}, {"cn": "现在正在建造的这栋楼房是我们的新图书馆", "en": "The building being built now is our new library.（being built 为现在分词的被动形式，表示动作正在进行之中。）.", "unit": "List 16"}, {"cn": "听到这个消息后，他们立即出发去北京了", "en": "Hearing the news, they immediately set off for Beijing.（时间）.", "unit": "List 17"}, {"cn": "所有的票已经卖光了，他们失望地离开了", "en": "All the tickets having been sold out, they went away disappointedly.", "unit": "List 17"}, {"cn": "他走进办公室，后面跟着一些孩子", "en": "He went into the office, followed by some children. /(and he was followed by some children).", "unit": "List 17"}, {"cn": "她沿着小路走着，紧跟在女儿后面", "en": "She walked along the path, following her daughter close behind.", "unit": "List 17"}, {"cn": "天气允许的话，我们将和朋友们去野餐", "en": "Weather permitting, we'll have a picnic with our friends.（条件状语）=If weather permits, we'll have a picnic with our friends.", "unit": "List 17"}, {"cn": "没有别的事可做，我们就回家了", "en": "There being nothing else to do, we went home.", "unit": "List 18"}, {"cn": "由于圣诞节的缘故，政府机关都休息了", "en": "It being Christmas, the government offices were closed.", "unit": "List 18"}, {"cn": "我过去在英国是靠左行驶的，但在中国我很快就习惯了靠右行驶", "en": "I used to drive on the left in England, but I soon got used to driving on the right in China.", "unit": "List 18"}, {"cn": "他不允许在他的房间里吸烟，实际上他不允许他的家人抽烟", "en": "He didn't allow smoking in his room, actually he didn't allow his family to smoke at all.", "unit": "List 18"}, {"cn": "没有人能避免受到广告的影响", "en": "No one can avoid being influenced by advertisements.", "unit": "List 18"}, {"cn": "从山顶上看，这座建筑看起来就像一个鸟巢", "en": "Viewed from the top of the mountain, the building looks like a bird nest.", "unit": "List 19"}, {"cn": "我要把这些信寄出去", "en": "I am going to have these letters mailed.", "unit": "List 19"}, {"cn": "原因在于她比其他人更努力工作", "en": "The reason lies in that she works harder than the others do.", "unit": "List 19"}, {"cn": "你能告诉我们飞往海南要花多少钱吗", "en": "Could you tell us how much it costs to fly to Hainan?", "unit": "List 19"}, {"cn": "我们飞往海南要花多少钱", "en": "How much does it cost us to fly to Hainan?", "unit": "List 19"}, {"cn": "原因是他无法操作这台机器", "en": "The reason is that he is unable to operate the machine.", "unit": "List 20"}, {"cn": "很遗憾，你错过了这个机会", "en": "That you missed the chance is a pity. = It is a pity that you missed the chance.", "unit": "List 20"}, {"cn": "计算机能够识别人类声音的想法让很多人感到惊讶", "en": "The idea that computers can recognize human voices surprises many people.", "unit": "List 20"}, {"cn": "她表达的希望是，他们将再次来中国访问", "en": "The hope that she expressed is that they would come to visit China again.", "unit": "List 20"}, {"cn": "我们希望他们再次来中国访问", "en": "We expressed the hope that they would come to visit China again.", "unit": "List 20"}, {"cn": "空气对于我们犹如水对于鱼", "en": "Air is to us what water is to fish.", "unit": "List 21"}, {"cn": "无论谁先回来，都应该赢得奖品", "en": "Whoever comes back first is supposed to win the prize.", "unit": "List 21"}, {"cn": "我们必须在7点钟以前到达那里。这就是为什么我们必须这么早开始", "en": "We must get there before 7 o'clock. That's why we have to start so early.", "unit": "List 21"}, {"cn": "他上大学的梦想能否实现还不确定", "en": "Whether his dream of going to college will come true is uncertain.", "unit": "List 21"}, {"cn": "毫无疑问，有人在他们到达之前就已经拜访过他们了", "en": "There can be no doubt that someone had visited the house before they arrived.", "unit": "List 21"}, {"cn": "根据卫星发回的信号和照片，科学家们得出结论，金星上没有生命", "en": "The scientists have come to the conclusion, based on the signals and photographs sent back by the satellite, that there's no life on Venus.", "unit": "List 22"}, {"cn": "我看到一些树的叶子是黑色的，因为空气污染了", "en": "I saw some trees whose leaves were black because of the polluted air.", "unit": "List 22"}, {"cn": "众所周知，台湾属于中国的领土", "en": "As everyone knows, Taiwan belongs to China.", "unit": "List 22"}, {"cn": "他是个经验丰富的人，从他那儿可以学到很多", "en": "He is a man of rich experience, from whom much can be learned. = He is a man of rich experience, whom much can be learned from.", "unit": "List 22"}, {"cn": "我永远忘不了我第一次遇见他的那一天", "en": "I'll never forget the day on which I first met him.", "unit": "List 22"}, {"cn": "他是班上英语说得很好的男生之一", "en": "He is one of the boys in our class who speak English well.（one of + 复数名词 + 关系代词引导的定语从句谓语动词用复数形式）.", "unit": "List 23"}, {"cn": "他是班上唯一英语说得很好的男生", "en": "He is the only one of the boys in our class who speaks English well.", "unit": "List 23"}, {"cn": "他受惩罚的原因我们都不知道", "en": "The reason why he was punished is unknown to us.", "unit": "List 23"}, {"cn": "太阳是一颗恒星，它给我们光和热", "en": "The sun, which gives us light and heat, is a fixed star.", "unit": "List 23"}, {"cn": "我不喜欢她走路的样子", "en": "I don't like the way (that/in which) she walks.", "unit": "List 23"}, {"cn": "没有任何人不犯错误", "en": "There is no man but errs. = There is no man who does not errs.（注意：只有在 but 前有先行词的时候，才有此用法）.", "unit": "List 24"}, {"cn": "两扇窗户之间挂着一幅画", "en": "Between the two windows hangs a picture.", "unit": "List 24"}, {"cn": "Not every means is useful. 不是每种方法都好使", "en": "Not all means are useful. 不是所有的方法都好使.", "unit": "List 24"}, {"cn": "A number of new books are on the desk. 桌子上有许多新书", "en": "The number of students in your class is 50. 你们班的学生人数是50.", "unit": "List 24"}, {"cn": "Nowhere was the lost car to be found. 丢失的车哪里都找不到。", "en": "", "unit": "List 24"}, {"cn": "不要嘲笑陷入困难的人", "en": "Don't laugh at the people in trouble.", "unit": "List 25"}, {"cn": "她信守承诺定期去看望她的阿姨", "en": "She keeps her promise to visit her aunt regularly.", "unit": "List 25"}, {"cn": "他在他闲暇时学习音乐", "en": "He studies music in his spare time.", "unit": "List 25"}, {"cn": "她迷路了，并且她的父母着实为他担心", "en": "She is lost and her parents are really worried about her.", "unit": "List 25"}, {"cn": "我尽可能走快点，但是我不能赶上他", "en": "I walked as fast as I could, but I couldn't catch up with him.", "unit": "List 25"}, {"cn": "你必须尽可能快的离开这儿", "en": "You must leave here as soon as possible.", "unit": "List 26"}, {"cn": "他的梦想在他的努力下实现了", "en": "His dream came true at last with his great effort.", "unit": "List 26"}, {"cn": "我们谈论如何处理废物", "en": "We talked about how to deal with the waste.", "unit": "List 26"}, {"cn": "旧的传统正在消失", "en": "The old traditions are dying out.", "unit": "List 26"}, {"cn": "不要担心，一切都在控制之中", "en": "Don't worry, everything's under control.", "unit": "List 26"}, {"cn": "在你上床睡觉前，你最好少吃东西", "en": "You had better eat less food before you go to bed.", "unit": "List 27"}, {"cn": "你认识站在树前面的女孩吗", "en": "Do you know the girl that is standing in front of the tree?", "unit": "List 27"}, {"cn": "在我的一生中，我从没有见过这位女士", "en": "I've never seen the woman before in my life.", "unit": "List 27"}, {"cn": "没有人知道在未来我们会开什么种类的车", "en": "No one knows what kind of cars we will have in the future.", "unit": "List 27"}, {"cn": "事实上，他害怕在大众面前演讲", "en": "In fact, he is afraid of making a speech in public.", "unit": "List 27"}, {"cn": "十个人依然下落不明", "en": "Ten people are still missing.", "unit": "List 28"}, {"cn": "美国的领导人大体上支持军事活动", "en": "Leaders in America have generally supported military action.", "unit": "List 28"}, {"cn": "他们已经用光了所有的钱", "en": "They have used up all their money.", "unit": "List 28"}, {"cn": "这场会议在 8 点举行", "en": "The meeting took place at 8 a.m.", "unit": "List 28"}, {"cn": "自从 2010 年以来，这个地方已经发生了巨大的改变", "en": "Great changes have taken place in this area since 2010.", "unit": "List 28"}];
 
       // Sentence/Phrase lookup arrays for speak buttons
-      var __allPhrases = PHRASES;
-      var __allSentences = SENTENCES;
 
       // Quiz state
       let quizState = {
@@ -2158,41 +2246,234 @@
       };
 
       let ttsAudio = null;
+      let ttsMarked = null;
+      let ttsUnlocked = false;
+      let ttsVoices = [];
+      let ttsTimers = [];
+      let ttsKeep = null;
+      let ttsHinted = 0;
 
-      function speak(text) {
+      // 手机浏览器只认手势内的播放请求，首次触摸先把语音引擎唤醒
+      function unlockTts() {
+        if (ttsUnlocked) return;
+        ttsUnlocked = true;
+        if ('speechSynthesis' in window) {
+          try {
+            var warm = new SpeechSynthesisUtterance(' ');
+            warm.volume = 0;
+            window.speechSynthesis.speak(warm);
+          } catch (e) {}
+        }
+      }
+      document.addEventListener('touchstart', unlockTts, { capture: true, passive: true });
+      document.addEventListener('pointerdown', unlockTts, { capture: true });
+      if ('speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.onvoiceschanged = function () {
+            ttsVoices = window.speechSynthesis.getVoices() || [];
+          };
+        } catch (e) {}
+      }
+
+      function ttsVoice() {
+        if (!ttsVoices.length && 'speechSynthesis' in window) ttsVoices = window.speechSynthesis.getVoices() || [];
+        var en = ttsVoices.filter(function (v) { return /^en/i.test(v.lang || ''); });
+        return en.filter(function (v) { return /Google|Samantha|Alex|Zira|David|Female|Male/i.test(v.name); })[0] || en[0] || null;
+      }
+
+      // 去掉中文注解与括号说明，只留能朗读的英文
+      function cleanSpeech(text) {
+        text = String(text == null ? '' : text);
+        var cut = text.search(/[　-〿一-鿿＀-￯]/);
+        if (cut >= 0) text = text.slice(0, cut);
+        text = text.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+        text = text.replace(/[（(][^）)]*[）)]?/g, ' ');
+        text = text.replace(/\s*\/\s*/g, ' ');
+        text = text.replace(/\s*([.,;:!?])\s*(?=[.,;:!?])/g, '');
+        text = text.replace(/\s+/g, ' ').trim();
+        text = text.replace(/^[.,;:!?=＝"'’]+/, '').replace(/[.,;:!?==”"']+$/, '');
+        return /[A-Za-z]/.test(text) ? text : '';
+      }
+
+      function markSpeaking(el) {
+        if (ttsMarked && ttsMarked !== el) ttsMarked.classList.remove('speaking');
+        ttsMarked = el || null;
+        if (ttsMarked) ttsMarked.classList.add('speaking');
+      }
+
+      function later(fn, ms) {
+        var id = setTimeout(fn, ms);
+        ttsTimers.push(id);
+        return id;
+      }
+
+      function stopKeepAlive() {
+        if (ttsKeep) { clearInterval(ttsKeep); ttsKeep = null; }
+      }
+
+      // 长句在 iOS/Chrome 上会中途停住，说话期间定时推一把
+      function startKeepAlive() {
+        stopKeepAlive();
+        ttsKeep = setInterval(function () {
+          var syn = window.speechSynthesis;
+          if (!syn) return stopKeepAlive();
+          if (syn.speaking && !syn.paused) {
+            try { syn.pause(); syn.resume(); } catch (e) {}
+          } else if (!syn.speaking) {
+            stopKeepAlive();
+          }
+        }, 8000);
+      }
+
+      function stopTts() {
+        ttsTimers.forEach(clearTimeout);
+        ttsTimers = [];
+        stopKeepAlive();
         if (ttsAudio) {
-          ttsAudio.pause();
+          try {
+            ttsAudio.onended = null;
+            ttsAudio.onerror = null;
+            ttsAudio.pause();
+            ttsAudio.src = '';
+          } catch (e) {}
           ttsAudio = null;
         }
-        var url = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=1';
-        ttsAudio = new Audio(url);
-        ttsAudio.volume = 1;
-        var fallbackTimer = setTimeout(function() {
-          if (ttsAudio && ttsAudio.paused && ttsAudio.readyState < 3) {
-            ttsAudio = null;
-            speakFallback(text);
-          }
-        }, 2000);
-        ttsAudio.addEventListener('canplay', function() { clearTimeout(fallbackTimer); });
-        ttsAudio.play().catch(function() {
-          clearTimeout(fallbackTimer);
-          speakFallback(text);
-        });
-        ttsAudio.addEventListener('error', function() {
-          clearTimeout(fallbackTimer);
-          speakFallback(text);
-        });
-      }
-
-      function speakFallback(text) {
         if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          var u = new SpeechSynthesisUtterance(text);
-          u.lang = 'en-US';
-          u.rate = 0.8;
-          window.speechSynthesis.speak(u);
+          try { window.speechSynthesis.cancel(); } catch (e) {}
         }
       }
+
+      function ttsHint(msg) {
+        if (ttsHinted >= 2) return;
+        ttsHinted++;
+        var t = document.getElementById('ttsHint');
+        if (!t) {
+          t = document.createElement('div');
+          t.id = 'ttsHint';
+          t.className = 'tts-hint';
+          document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._hide);
+        t._hide = setTimeout(function () { t.classList.remove('show'); }, 3000);
+      }
+
+      function nudge(el) {
+        if (!el) return;
+        el.classList.remove('tts-empty');
+        void el.offsetWidth;
+        el.classList.add('tts-empty');
+        setTimeout(function () { el.classList.remove('tts-empty'); }, 450);
+      }
+
+      // 单词、短语走有道（音质好、命中高）；句子走本机语音（有道读不了整句）
+      function speak(text, el) {
+        var say = cleanSpeech(text);
+        if (!say) {
+          if (!/[A-Za-z]/.test(String(text || ''))) ttsHint('这句没有英文内容');
+          nudge(el);
+          return;
+        }
+        unlockTts();
+        stopTts();
+        markSpeaking(el);
+        var short = say.split(/\s+/).length <= 4 && say.length <= 34;
+        var lastResort = function () {
+          markSpeaking(null);
+          ttsHint('没读出声音：请检查手机媒体音量，或换个浏览器（如系统浏览器、Chrome）');
+        };
+        if (short) playYoudao(say, function () { playLocal(say, lastResort); });
+        else playLocal(say, function () { playYoudao(say, lastResort); });
+      }
+
+      function playYoudao(text, onFail) {
+        var audio = new Audio('https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=1');
+        audio.preload = 'auto';
+        audio.volume = 1;
+        ttsAudio = audio;
+        var settled = false;
+        var bail = function () {
+          if (settled) return;
+          settled = true;
+          if (ttsAudio === audio) {
+            try { audio.pause(); audio.src = ''; } catch (e) {}
+            ttsAudio = null;
+          }
+          if (onFail) onFail();
+          else markSpeaking(null);
+        };
+        var watch = later(bail, 2600);
+        audio.addEventListener('playing', function () { clearTimeout(watch); });
+        audio.addEventListener('timeupdate', function () { if (audio.currentTime > 0.05) clearTimeout(watch); });
+        audio.addEventListener('ended', function () {
+          settled = true;
+          clearTimeout(watch);
+          if (ttsAudio === audio) ttsAudio = null;
+          markSpeaking(null);
+        });
+        audio.addEventListener('error', bail);
+        var pr = audio.play();
+        if (pr && pr.catch) pr.catch(function () {});
+      }
+
+      function playLocal(text, onFail) {
+        var syn = window.speechSynthesis;
+        var die = function () {
+          stopKeepAlive();
+          if (onFail) onFail();
+          else markSpeaking(null);
+        };
+        if (!('speechSynthesis' in window) || !syn) { die(); return; }
+        var u;
+        try {
+          if (syn.speaking || syn.pending) syn.cancel();
+          u = new SpeechSynthesisUtterance(text);
+        } catch (e) { die(); return; }
+        var v = ttsVoice();
+        if (v) u.voice = v;
+        u.lang = (v && v.lang) || 'en-US';
+        u.rate = 0.9;
+        u.pitch = 1;
+        var started = false, finished = false;
+        u.onstart = function () {
+          started = true;
+          clearTimeout(watch);
+          startKeepAlive();
+        };
+        u.onend = function () {
+          finished = true;
+          stopKeepAlive();
+          markSpeaking(null);
+        };
+        u.onerror = function () {
+          if (finished) return;
+          finished = true;
+          if (started) { stopKeepAlive(); markSpeaking(null); }
+          else die();
+        };
+        var watch = later(function () { if (!started && !finished) { finished = true; die(); } }, 1600);
+        try {
+          syn.speak(u);
+          if (syn.paused) syn.resume();
+        } catch (e) {
+          if (!finished) { finished = true; die(); }
+        }
+      }
+
+      // 整行/整句可点：词组行、句子行、卡片里的例句与短语标签
+      document.addEventListener('click', function (e) {
+        var row = e.target.closest('.unit-phrase-item, .unit-sentence-item');
+        if (row) {
+          var en = row.querySelector('.unit-phrase-text, .unit-sentence-en');
+          var cn = row.querySelector('.unit-sentence-cn');
+          var txt = en && en.textContent.trim() ? en.textContent : (cn ? cn.textContent : row.textContent);
+          speak(txt, row);
+          return;
+        }
+        var chip = e.target.closest('.example-sentence, .phrase-item, .extend-words .phrase-tag');
+        if (chip) speak(chip.textContent, chip);
+      });
 
       function shuffleArray(arr) {
         const shuffled = [...arr];
@@ -2238,7 +2519,7 @@
             <div class="word-main">
               <div class="word-text">
                 ${item.word}
-                <button class="speak-btn" onclick="event.stopPropagation(); speak('${item.word}')" title="朗读">
+                <button class="speak-btn" onclick="event.stopPropagation(); speak('${item.word}', this)" title="朗读">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -2266,7 +2547,7 @@
         `;
 
         card.addEventListener("click", (e) => {
-          if (e.target.closest(".speak-btn")) return;
+          if (e.target.closest(".speak-btn, .unit-phrase-item, .unit-sentence-item, .example-sentence, .phrase-item, .phrase-tag")) return;
           card.classList.toggle("expanded");
         });
 
@@ -2335,7 +2616,7 @@
               phraseHtml += '<div class="unit-phrase-item">';
               phraseHtml += '<div class="unit-phrase-text">' + p.phrase + '</div>';
               phraseHtml += '<div class="unit-phrase-meaning">' + p.meaning + '</div>';
-              phraseHtml += '<button class="unit-phrase-speak-btn" onclick="speak(__allPhrases[' + PHRASES.indexOf(p) + '].phrase)" title="朗读">';
+              phraseHtml += '<button class="unit-phrase-speak-btn" title="朗读">';
               phraseHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>';
               phraseHtml += '</button></div>';
             });
@@ -2355,7 +2636,7 @@
               sentenceHtml += '<div class="unit-sentence-item">';
               sentenceHtml += '<div class="unit-sentence-cn">' + s.cn + '</div>';
               sentenceHtml += '<div class="unit-sentence-en">' + s.en + '</div>';
-              sentenceHtml += '<button class="unit-sentence-speak-btn" onclick="speak(__allSentences[' + SENTENCES.indexOf(s) + '].en)" title="朗读">';
+              sentenceHtml += '<button class="unit-sentence-speak-btn" title="朗读">';
               sentenceHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>';
               sentenceHtml += '</button></div>';
             });
@@ -2538,7 +2819,7 @@
           subtitleText = quizState.unitName + ' · 根据释义写出对应的英文单词';
           questionHtml = '<div class="quiz-pos">' + current.meanings[0].pos + '</div>'
             + '<div class="quiz-meaning">' + current.meanings[0].def + '</div>'
-            + '<button class="quiz-speak-btn" onclick="speak(\'' + current.word.replace(/'/g, "\\'") + '\')" title="朗读单词">'
+            + '<button class="quiz-speak-btn" onclick="speak(\'' + current.word.replace(/'/g, "\\'") + '\', this)" title="朗读单词">'
             + '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">'
             + '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />'
             + '<path d="M15.54 8.46a5 5 0 0 1 0 7.07" />'
@@ -2735,7 +3016,7 @@
                     <div class="wrong-word-text">${text}</div>
                     <div class="wrong-word-meaning">${meaning}</div>
                   </div>
-                  <button class="speak-btn" onclick="speak('${text.replace(/'/g, "\\'")}')" title="朗读">
+                  <button class="speak-btn" onclick="speak('${text.replace(/'/g, "\\'")}', this)" title="朗读">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -3112,7 +3393,7 @@
                   ${dots.join("")}
                 </div>
                 <div class="review-next-time due-now">待复习</div>
-                <button class="speak-btn" onclick="speak('${w.word}')" title="朗读">
+                <button class="speak-btn" onclick="speak('${w.word}', this)" title="朗读">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -3164,7 +3445,7 @@
                         ${dots.join("")}
                       </div>
                       <div class="review-next-time">${formatNextReviewTime(status.nextReview)}</div>
-                      <button class="speak-btn" onclick="speak('${w.word}')" title="朗读">
+                      <button class="speak-btn" onclick="speak('${w.word}', this)" title="朗读">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                           <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -3259,7 +3540,7 @@
               <div class="quiz-question">
                 <div class="quiz-pos">${currentWord.meanings[0].pos}</div>
                 <div class="quiz-meaning">${currentWord.meanings[0].def}</div>
-                <button class="quiz-speak-btn" onclick="speak('${currentWord.word.replace(/'/g, "\\'")}')" title="朗读单词">
+                <button class="quiz-speak-btn" onclick="speak('${currentWord.word.replace(/'/g, "\\'")}', this)" title="朗读单词">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -3386,7 +3667,7 @@
                     <div class="wrong-word-text">${w.word}</div>
                     <div class="wrong-word-meaning">${w.meanings[0].def}</div>
                   </div>
-                  <button class="speak-btn" onclick="speak('${w.word}')" title="朗读">
+                  <button class="speak-btn" onclick="speak('${w.word}', this)" title="朗读">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -4048,7 +4329,7 @@
             <div class="word-main">
               <div class="word-text">
                 ${item.word}
-                <button class="speak-btn" onclick="event.stopPropagation(); speak('${item.word}')" title="朗读">
+                <button class="speak-btn" onclick="event.stopPropagation(); speak('${item.word}', this)" title="朗读">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -4070,7 +4351,7 @@
         `;
 
         card.addEventListener('click', (e) => {
-          if (e.target.closest('.speak-btn')) return;
+          if (e.target.closest('.speak-btn, .unit-phrase-item, .unit-sentence-item, .example-sentence, .phrase-item, .phrase-tag')) return;
           card.classList.toggle('expanded');
         });
 
