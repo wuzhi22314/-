@@ -3841,7 +3841,7 @@
           '确定要删除所有通过PDF导入的单词吗？<br><br>这将删除所有自定义单词，但保留内置的40个示例单词和复习记录。',
           () => {
             localStorage.removeItem('customWords');
-            WORDS = WORDS.filter(w => !w.unit || w.unit === '默认单元');
+            WORDS = WORDS.filter(w => w.unit && w.unit !== '默认单元');
             closeHistoryManager();
             buildUnitNav();
             renderWords();
@@ -3857,7 +3857,7 @@
           () => {
             localStorage.removeItem('wordReviewData');
             localStorage.removeItem('customWords');
-            WORDS = WORDS.filter(w => !w.unit || w.unit === '默认单元');
+            WORDS = WORDS.filter(w => w.unit && w.unit !== '默认单元');
             closeHistoryManager();
             buildUnitNav();
             renderWords();
@@ -4156,7 +4156,12 @@
       }
 
       function importUnits() {
+        let skippedWords = 0;
         Object.entries(UNIT_DATA).forEach(([unit, words]) => {
+          if (unit === '默认单元') {
+            skippedWords += words.length;
+            return;
+          }
           if (!WORDS.some(w => w.unit === unit)) {
             words.forEach(word => {
               WORDS.push(word);
@@ -4168,6 +4173,7 @@
         buildUnitNav();
         renderWords();
         saveWordsToStorage();
+        if (skippedWords) alert('有 ' + skippedWords + ' 个单词没识别到单元分组，未导入。PDF 里请按「List X / Unit X」分好单元。');
       }
 
       function scrollUnitNav(direction) {
@@ -4254,7 +4260,7 @@
 
       function saveWordsToStorage() {
         try {
-          localStorage.setItem('customWords', JSON.stringify(WORDS));
+          localStorage.setItem('customWords', JSON.stringify(WORDS.filter(w => w.unit && w.unit !== '默认单元')));
         } catch (e) {
           console.error('保存失败:', e);
         }
@@ -4262,10 +4268,18 @@
 
       function loadWordsFromStorage() {
         try {
-          const saved = localStorage.getItem('customWords');
-          if (saved) {
-            const customWords = JSON.parse(saved);
-            WORDS.push(...customWords);
+          const saved = JSON.parse(localStorage.getItem('customWords') || '[]');
+          const seen = new Set(WORDS.map(w => String(w.word).toLowerCase() + '|' + w.unit));
+          const keep = saved.filter(w => {
+            if (!w.unit || w.unit === '默认单元') return false;
+            const key = String(w.word).toLowerCase() + '|' + w.unit;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          WORDS.push(...keep);
+          if (keep.length !== saved.length) {
+            localStorage.setItem('customWords', JSON.stringify(keep));
           }
         } catch (e) {
           console.error('加载失败:', e);
